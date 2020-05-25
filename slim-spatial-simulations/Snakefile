@@ -1,0 +1,141 @@
+#! python3
+"""
+Iterate through specified lists of parameters for 1D SLiM simulations.
+Workflow for each replicate and each combination of parameters:
+	1) Write a .csv to define an array of allowed nearest-neighbor migrations
+		**output filename starts with "migration"**
+	2) Write a SLiM eidos script that sources allowed migrations from .csv above
+		**output filename starts with "stepstonemodel"**
+	3) Run SLiM on model script
+		**output filename starts with "slimoutput"**
+	4) Parse SLiM output into .csv
+		**output filename starts with "parsedslim"**
+	5) Concatenates replicate parsed SLiM outputs into a single .csv
+		**output filename starts with "concat_reps"**
+"""
+import numpy as np
+### Specify parameter lists to be iterated over
+numdemes = [5] #number of demes in 1D simulation
+demepopsize = [1000] #population size per deme
+m = [0.00001] #symmetric migration rate
+mu = [1e-3] #symmetric mutation rate
+s = [-1e-2] #selection coefficient (negative is purifying selection)
+sigma = 4
+label = "TESTB" #label string to keep track of simulation runs
+numreps = 2 #number of replicates
+
+### Specify which SLiM template file to run:
+## Only provides allele frequencies of each deme at equilibrium (t~10000)
+templatefile = "equilibrium_frequency_stepstonemodel_template.txt"
+## Provides allele frequencies of each deme at each time step (t~10000)
+# templatefile = "timeseries_stepstonemodel_template.txt"
+
+### If timeseries template is chosen, **do not** run rule concat_reps
+### TODO WRITE CONDITIONAL STATEMENT TO ENSURE ABOVE CONDITION
+
+### Define workflow filenames
+param_suffix = ("_numdemes_{numdemes}" +
+				"_demepopsize_{demepopsize}" +
+				"_m_{m}" +
+				"_mu_{mu}" +
+				"_s_{s}" +
+				"_{label}")
+
+migfilename = "migration" + param_suffix + "{numreps}.csv"
+modelfilename = "stepstone_model" + param_suffix + "{numreps}"
+slimfilename = "slim_output" + param_suffix + "{numreps}.txt"
+parsed_slimfilename = "parsed_slim" + param_suffix + "{numreps}.csv"
+concat_repsfilename = "concat_reps" + param_suffix + ".csv"
+unif_samplefilename = "unif_samplefilename" + param_suffix + "_sigma_{sigma}.txt"
+
+### Define directory paths
+indir = "data/input/"
+mig_dir = "migration/"
+model_dir = "stepstone_model/"
+outdir = "data/output/"
+template_dir = "data/templates/"
+slimfiles_dir = "slim_output/"
+parsed_dir = "parsed_slim/"
+concat_reps_dir = "concat_reps/"
+sampling_dir = "sampling/"
+
+rule all:
+	input:
+		expand(outdir + concat_reps_dir + concat_repsfilename,
+				numdemes = numdemes,
+				demepopsize = demepopsize,
+				m = m,
+				mu = mu,
+				s = s,
+				label = label),
+		expand(outdir + sampling_dir + unif_samplefilename,
+				numdemes = numdemes,
+				demepopsize = demepopsize,
+				m = m,
+				mu = mu,
+				s = s,
+				label = label,
+				sigma = sigma)
+
+rule write_migrationcsv:
+	output: indir + mig_dir + migfilename
+	run:
+		shell("python src/slim_input_migration.py "
+				"--numdemes {wildcards.numdemes} "
+				"--demepopsize {wildcards.demepopsize} "
+				"--m {wildcards.m} "
+				"--mu {wildcards.mu} "
+				"--s {wildcards.s} "
+				"--label {wildcards.label} "
+				"--out {output}")
+
+# TODO rule timeseries:
+
+
+
+rule write_modelfile:
+    input: indir + mig_dir + migfilename
+    output: indir + model_dir + modelfilename
+	run:
+		shell("python src/slim_input_model.py "
+				"--template " + template_dir + templatefile +
+				" --migfilename {input} "
+				"--out {output}")
+
+rule run_slim:
+    input: indir + model_dir + modelfilename
+	output: outdir + slimfiles_dir + slimfilename
+	run:
+		shell("slim {input} > {output}")
+
+rule parse_slim:
+	input: outdir + slimfiles_dir + slimfilename
+	output: outdir + parsed_dir + parsed_slimfilename
+	run:
+		shell("python src/slim_output_parser.py "
+				"--slimoutputfile {input} "
+				"--out {output}")
+
+rule concat_reps:
+	input:
+		expand(outdir + parsed_dir + parsed_slimfilename,
+				numdemes = numdemes,
+				demepopsize = demepopsize,
+				m = m,
+				mu = mu,
+				s = s,
+				label = label,
+				numreps = range(numreps))
+	output: outdir + concat_reps_dir + concat_repsfilename
+	shell: "cat {input} > {output}"
+
+rule sample:
+	input:
+		outdir + concat_reps_dir + concat_repsfilename
+	output:
+		outdir + sampling_dir + unif_samplefilename
+	run:
+		shell("python src/slim_uniform_sampler.py "
+				"--freqfilename {input} "
+				"--sigma {wildcards.sigma} "
+				"--out {output}")

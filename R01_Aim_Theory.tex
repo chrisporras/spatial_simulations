@@ -1,0 +1,146 @@
+
+\documentclass[SpecificAims_and_Proposal]{subfiles}
+
+%\documentclass[11pt]{nih}
+%\usepackage{amsmath}
+%\usepackage{amssymb}
+%\usepackage{graphicx}
+%\usepackage[nomargin,inline,index,draft]{fixme}
+%\usepackage{natbib}
+%\usepackage{wrapfig}
+%
+
+\begin{document}
+
+%\bibliographystyle{abbrvnat}
+%\bibliography{2014-06-bd2k.bib}
+%\clearpage
+
+
+%%% WISH-LIST
+
+%%% Initial Draft!!
+
+\subsection*{Aim 4: Models of spatial allelic spread to build deeper understanding of the portability of GWAS results }
+
+
+\subsubsection*{Significance}\label{significance}
+
+%The first decade of genome-wide association studies (GWAS) has indicates that much
+%of the variation in disease risk is due to very rare alleles.
+%Population genetics theory suggests that this is because disease risk alleles are under purifying selection.
+%In a geographically structured population, we expect such alleles to be eliminated by selection
+%before they can spread far from their original location.
+%However, despite the extensive theory on genetic relatedness in structured populations,
+%the spatial distributions of rare deleterious alleles have not been characterized in detail.
+
+We believe data visualization tools are best developed with a thorough theoretical understanding of the system in hand.  \textbf{Thus, for our final aim, we will develop missing theoretical foundations that could strengthen data visualization tools in our topic area.  The insights provided by this Aim will feed back into our overall work and inform the development of the other Aims.}  To be specific, we will develop theoretical models for the geographic spread of alleles contributing to a disease trait.
+
+\begin{wrapfigure}{r}{0.25\textwidth}
+ \vspace{-20pt}
+\includegraphics[width=.245\textwidth]{fig/AimTheory/spatial_distributions.png}
+\vspace{-5pt}
+\caption{\footnotesize Schematic geographic distributions of selected alleles. Large-effect alleles are rarer and more localized than small-effect alleles.}
+\vspace{-10pt}
+\label{fig:spatial_distributions}
+\end{wrapfigure}
+
+The first decade of genome-wide association studies (GWAS) has revealed that alleles with the largest effects on traits tend to be rare (e.g. \citep{Marouli:2017aa}), and these may disproportionately represent ``core" genes that play key roles in disease etiology, relative to more peripheral genes that have weak effects mediated interacting gene networks \citep{Boyle:2017aa}.  As highlighted by the preliminary data of Aim 3, such rare variants are typically geographically restricted.  A plausible explanation for this pattern is that natural selection eliminates these variants quickly, limiting their opportunity to spread.  However, \textbf{despite the extensive theory on genetic diversity in structured populations, theoretical expectations for the spatial distributions of rare deleterious alleles have not been developed in quantitative detail.}
+
+We are particularly interested in this problem because, despite the efforts of study designers to obtain representative population samples, it is inevitable that association studies will feature significant geographic bias.  For instance, the UK BioBank contains samples of people who have migrated to the United Kingdom from around the world, but still represents a small fraction of global diversity that is highly biased toward one corner of one continent.  It is likely that similarly unbalanced samples will arise around other centers of genomics research and other mega-cohort studies (e.g. the Chinese Biobank effort, the All of Us cohort).  We are interested in understanding the consequences of such biases on GWAS studies.
+
+Thus, we propose to develop the theory of rare alleles in order to understand
+how natural selection, spatial structure, and geographic sampling bias interact
+to determine the inferred local and global genetic architecture of a trait.  The results will inform the development of visualizations tools and, perhaps more important, the interpretation of large association studies.
+
+\subsubsection*{Innovation}\label{innovation}
+
+This project will be the first theoretical integration of spatial population genetics models, natural selection on complex
+traits, and the inference of genetic architecture from genome-wide
+association studies. Previous work on spatial models has focused on the decay of average genetic relatedness with distance, primarily in neutral models
+(e.g. \cite{Kimura1964, Malecot1975, Barbujani1987, Barton2002}).
+Most non-neutral results pertain to selective clines \cite{Slatkin1973, Felsenstein1975, Nagylaki1978}
+or the spatial patterns of selective sweeps (e.g \cite{Ralph2010}).
+Our goal is to characterize the full spatial distributions of rare transient alleles (as in the small simulation study by Slatkin and Charlesworth \cite{Slatkin1978}).
+
+Our work adds to the growing literature of theoretical population genetics models for disease variants \cite{Pritchard2001,EyreWalker2010,Simons2014,Simons2018},
+but is one of the first to consider the consequences of spatial population structure.
+We are also motivated by a recent paper by Martin et al. \cite{Martin2017},
+which examined the impact of demographic history on genetic risk prediction,
+but did not explicitly consider either selection or spatial structure.
+
+The work on this aim may also suggest innovative data visualizations.  For example, we expect the results will help us develop the most relevant ways to relate GWAS effect size, the geographic range of an allele, and an allele's peak frequency, into compelling new views of human disease variation.
+
+\subsubsection*{Approach}\label{approach}
+
+
+\begin{wrapfigure}{r}{0.20\textwidth}
+ \vspace{-20pt}
+\includegraphics[width=.195\textwidth]{fig/AimTheory/method_schematic.png}
+\vspace{-5pt}
+\caption{\footnotesize The phenotypic selection model specifies the supply rate and selection coefficients of mutations
+as a function of phenotypic effect (a). This is combined with the population genetics model and spatial sampling distribution (b) to generate the true genetic architecture of the trait in the sample (c). Causal alleles are identified according to the study power to give the ascertained genetic architecture (d).}
+\vspace{-10pt}
+\label{fig:method_schematic}
+\end{wrapfigure}
+
+To focus our efforts, we will concentrate on calculating what we term the \emph{ascertained genetic architecture} of a trait.  That is, we would like to know the expected number of causal alleles detected by GWAS as a function of the phenotypic effects and frequencies of the underlying causal alleles.
+We will then show how the ascertained architecture changes as the geographic distribution of the GWAS sample varies from uniform to extremely concentrated.  This calculation relies on three components:
+(1) a model of phenotypic selection,
+(2) a model of a geographically structured population,
+and (3) a model of causal variant ascertainment by GWAS.  Figure \ref{fig:method_schematic} provides a conceptual overview.
+
+We will model phenotypic selection with two simplifying assumptions:
+(1) the phenotypic effects of mutations are small and additive, and
+(2) fitness is a smooth function of an individual's phenotype.
+These assumptions allow us to calculate the selection coefficient of a mutation as a power series in its effect size
+by Taylor expanding the fitness function about the population mean trait value.  The relative magnitudes of the first two terms in the series determine whether selection is primarily directional or primarily balancing.  Our approach thus captures important generic features of polygenic selection without assuming a parametric form of the fitness function.
+
+The key output of our population genetics analysis will be to calculate the expected allele frequency spectrum as a function of: the sampling scheme, the selection coefficient of an allele (determined as above), and the spatial structure. First, we will examine the simplest possible model of a structured population:
+a symmetric two-deme model with a constant rate of migration.
+Then, we will extend our results to the stepping-stone approximation of a continuous population \cite{Kimura1964, Malecot1975}.
+This model assumes symmetric migration between nearest-neighbor demes arrayed on a lattice,
+and is a convenient solution to the challenges of modeling populations in continuous space (see \citet{Barton2013} for a thorough discussion of these challenges).
+As shown in the Preliminary Studies below, we can formulate the problem using a system of stochastic differential equations and solve for the time-dependent moments of allele frequencies in each deme (cf. \cite{Jouganous2017}, which demonstrated a similar moment-based approach to the allele frequency spectrum). These equations can be simplified by Fourier transformation, following \cite{Malecot1975}, who used Fourier transforms to model the decay of allele sharing with distance in a neutral model.
+
+Having thus calculated the allele frequency spectrum of mutations as a function of their phenotypic effect, we will model the ascertainment of causal variants by GWAS.
+The power to detect a causal variant depends on its contribution to phenotypic variance,
+and we propose for rare alleles the simple, yet flexible, relationship,
+$\text{Power} \sim \left[\beta^2 p(1-p) \right]^\alpha$,
+where $\beta$ is the phenotypic effect, $p$ is the allele frequency in the entire sample,
+and $\alpha$ is a parameter that determines the study's sensitivity to rare alleles.
+The allele frequency in this power function is a sum over the sample frequencies in each deme weighted by the per-deme sample size ($p=\sum p_i n_i / \sum n_i$), thus integrating over the unobserved spatial bias of the sample. Putting all of these pieces together will allow us to compare the whole-population genetic architecture to the inferred architecture under different sampling schemes.
+
+\subsubsection*{Preliminary studies}\label{preliminary-studies}
+
+In our preliminary work on this problem, we have begun to study selection in the stepping-stone model described in the Approach.  The key quantity that we need to calculate is the joint allele frequency spectrum:
+the expected number of mutations found in $\{k_1, \ldots k_d\}$ copies in each of $d$ demes,
+given per-deme sample sizes $\{ n_1, \ldots, n_d \}$.
+This expectation is a linear combination of the joint moments of the allele frequency in each deme \cite{Jouganous2017}.
+We model the random time evolution of allele frequencies, $f_i$, in each deme
+with a system of coupled stochastic differential equations:
+\begin{equation}
+df_i = [\mu(1-2f_i) - sf_i(1-f_i) + \sum_j m_{ij} f_j]dt + \sqrt{f_i(1-f_i)/N} \,dW_i,
+\end{equation}
+where the three deterministic terms represent mutation, selection, and migration;
+and $\{dW_i\}$ are the differentials of $d$ independent Weiner processes representing genetic drift. We can use It\^{o}'s lemma to derive a system of ordinary differential equations for arbitrary moments,
+and then solve for the equilibrium allele frequency spectrum.  An apparent difficulty with this approach is that the moment hierarchy does not close: each moment depends on higher-order moments.
+Fortunately, our focus on rare alleles offers a solution. If $f_i \ll 1$, we may neglect the $(1-f_i)$ terms and obtain linearized SDEs. With this approximation, the moment hierarchy closes and we can calculate moments of all orders by solving a system of coupled linear equations.
+
+Using this approach, we can already show that, in steady state, the mean allele frequency of a deleterious allele is $\mu/s$ (the standard mutation-selection balance result),
+and the characteristic length scale of genetic correlations is $\sqrt{m/s}$ (in units of the inter-deme spacing), in agreement with \citet{Kimura1964}.
+However, using our rare allele simplification, we can also go beyond these known results to calculate higher-order moments that can be used to build expectations for ascertained genetic architecture.
+
+\subsubsection*{Expected outcomes and potential
+problems}\label{expected-outcomes-and-potential-problems}
+Our work will generate useful results for both population genetics and the genetics of complex traits.  \textbf{We also hope this work will contribute to the growing awareness of the importance of considering global diversity in genomics research.}
+
+More specifically, our calculation of the joint allele frequency spectrum in the stepping-stone model
+will open the door to future studies of how spatial structure interacts with
+selection to generate patterns of genetic diversity. Second, our demonstration of how inferred genetic architecture depends on the geographic sampling scheme will guide the interpretation of forthcoming large but geographically biased GWAS results. \textbf{We note that disease GWAS have two main goals--identifying causal pathways and predicting individual risk--and we hypothesize that geographic structure generates a tradeoff between them. A geographically concentrated sampling scheme may be better at ascertaining large-effect mutations that are kept rare by selection. On the other hand, these alleles will not contribute to risk variation far from the highly sampled region.} Our work will formalize this intuition by means of analytical calculations and simulations, yielding quantitative insights for interpreting GWAS results in light of population genetics.
+
+While our models may be simple, \textbf{we take as inspiration the highly cited paper by Mathieson and McVean \cite{Mathieson2012} that uses a toy model to illustrate a conceptual issue in the interpretation of GWAS studies in spatially structured populations}. In our own previous work we successfully used simulations in simple stepping-stone models to reveal important pitfalls in interpreting PCA visualizations from large geographic samples \cite{Novembre:2008ek}.  We also will be supplementing our calculations
+with simulations that relax numerous simplifications (that the demographic history is time-invariant,
+that the population structure is translation-invariant, and the allele frequency spectrum is near steady-state).  Another issue is that it may be computationally expensive to calculate the allele frequency spectrum for large samples. If necessary, we will calculate analytical asymptotic formulae in the limit of very large sample sizes to simplify the computations.
+
+\end{document}

@@ -1,0 +1,64 @@
+initialize(){
+ inlines = readFile(filename);
+ lines = inlines[substr(inlines, 0, 1) == "//"];
+
+for (line in lines)
+ {
+ fields = strsplit(line, ",");
+ mu = asFloat(fields[3]);
+ s = asFloat(fields[4]);
+ }
+
+ initializeMutationRate(mu);
+ initializeMutationType("m1", 1.0, "f", s);
+ m1.mutationStackPolicy = "f";
+ initializeGenomicElementType("g1", m1, 1.0);
+ initializeGenomicElement(g1, 0, 0);
+ initializeRecombinationRate(0);
+ defineConstant("start", clock());
+ defineConstant("numdemes", asInteger(fields[1]));
+ defineConstant("demepopsize", asInteger(fields[2]));
+ defineConstant("file", filename);
+}
+1 { // Loop for number of demes
+for (i in 1:numdemes)
+ sim.addSubpop(i, demepopsize);
+ subpops = sim.subpopulations;
+
+ // Read in allowed migrations from src to dest
+ lines = readFile(file);
+ lines = lines[substr(lines, 0, 1) != "//"];
+
+for (line in lines)
+ {
+ fields = strsplit(line, ",");
+ i = asInteger(fields[0]);
+ j = asInteger(fields[1]);
+ m = asFloat(fields[2]);
+
+ if (i != j)
+ {
+ // Assign migration+cloning rates per subpop
+ p_i = subpops[subpops.id == i];
+ p_j = subpops[subpops.id == j];
+ p_j.setMigrationRates(p_i, m);
+ p_i.setCloningRate(1.0);
+ p_j.setCloningRate(1.0);
+ }
+ }
+}
+late() {
+
+ // remove any new mutations added to the disabled diploid genomes
+ sim.subpopulations.individuals.genome2.removeMutations();
+
+ // remove mutations in the haploid genomes that have fixed
+ muts = sim.mutationsOfType(m1);
+ freqs = sim.mutationFrequencies(NULL, muts);
+ sim.subpopulations.genomes.removeMutations(muts[freqs == 0.5], T);
+}
+
+20000 late()  {
+ cat("\n"+"#"+"Elapsed time: " + (clock() - start) + "\n");
+ sim.outputFull();
+}

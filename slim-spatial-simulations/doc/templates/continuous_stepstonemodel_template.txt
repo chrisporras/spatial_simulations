@@ -1,0 +1,62 @@
+initialize() {
+
+// TODO Introduce competition to control population density
+
+ s = -1e-2;
+ mu = 1e-3;
+
+ initializeSLiMOptions(dimensionality="xy");
+ initializeMutationRate(mu);
+ initializeMutationType("m1", 1.0, "f", s);
+ m1.mutationStackPolicy = "f";
+ initializeGenomicElementType("g1", m1, 1.0);
+ initializeGenomicElement(g1, 0, 0);
+ initializeRecombinationRate(0);
+ defineConstant("start", clock());
+ defineConstant("numdemes", 4);
+ defineConstant("demepopsize",1000);
+}
+1 { // Loop for number of demes
+for (i in 1:(numdemes))
+ sim.addSubpop(i, demepopsize);
+ subpops = sim.subpopulations;
+ p_i = subpops[subpops.id == i];
+
+ // FIXME doesn't edit bounds of last subpop
+ //p_i.setSpatialBounds(c(0.0,0.0,10.0,10.0));
+
+// initial positions are random in bounds
+ p_i.individuals.x = runif(p_i.individualCount);
+ p_i.individuals.y = runif(p_i.individualCount);
+}
+
+modifyChild() {
+// draw a child position near the first parent, within bounds
+do child.x = parent1.x + rnorm(1, 0, 0.02);
+while ((child.x < 0.0) | (child.x > 1.0));
+do child.y = parent1.y + rnorm(1, 0, 0.02);
+while ((child.y < 0.0) | (child.y > 1.0));
+return T;
+}
+
+late() {
+ // remove any new mutations added to the disabled diploid genomes
+ sim.subpopulations.individuals.genome2.removeMutations();
+
+ // remove mutations in the haploid genomes that have fixed
+ muts = sim.mutationsOfType(m1);
+ freqs = sim.mutationFrequencies(NULL, muts);
+ sim.subpopulations.genomes.removeMutations(muts[freqs == 0.5], T);
+}
+
+10000 late()  {
+ subpops = sim.subpopulations;
+ for (i in 1:length(subpops))
+ {
+ freq = sim.mutationFrequencies(subpops[subpops.id == i],sim.mutationsOfType(m1));
+ print(paste(("Deme number: " + asString(i) + "_")));
+ print(2*sum(freq));
+}
+ cat("\n"+"#"+"Elapsed time: " + (clock() - start) + "s\n");
+ sim.simulationFinished();
+}

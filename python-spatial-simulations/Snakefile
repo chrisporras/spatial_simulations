@@ -1,0 +1,49 @@
+#! python3
+"""
+Iterate through parameters specified for the Wright-Fisher
+diffusion model with Stepping-Stone migration
+"""
+### Specify parameter lists to be iterated over
+pop_size = [1e5,1e6] #population size per deme
+mu = [0] #symmetric mutation rate
+s = [1e-1,1e-2,1e-3] #selection coefficient (purifying selection)
+m = [1e-1,1e-2,1e-3] #symmetric migration rate
+num_intervals = 1000 #number of generations
+dims = (50,1) #dimensions of spatial lattice
+label = "021820" #label string to keep track of simulation runs
+
+### Define directory paths
+outdir = "data/output/"
+
+### Define filenames
+param_suffix = ("_pop_size_{pop_size}" +
+				"_mu_{mu}" +
+				"_s_{s}" +
+				"_m_{m}" +
+				"_label_{label}")
+
+### Saving freqs as NumPy bite arrays for quick access
+freqs_filename = "SS_WF_freqs" + param_suffix + ".npy"
+
+rule all:
+	input:
+		expand(outdir + freqs_filename,
+				pop_size = pop_size,
+				mu = mu,
+				s = s,
+				m = m,
+				num_intervals = num_intervals,
+				dims = dims,
+				label = label)
+
+rule write_freqs:
+	output: outdir + freqs_filename
+	run:
+		shell("python src/downsample_simulator.py "
+				"--pop_size {wildcards.pop_size} "
+				"--mu {wildcards.mu} "
+				"--s {wildcards.s} "
+				"--m {wildcards.m} "
+				"--num_intervals {num_intervals} "
+				"--dims {dims} "
+				"--out {output}")
